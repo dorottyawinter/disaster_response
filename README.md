@@ -14,7 +14,6 @@
 Requires Python 3.7.6 and the following libraries:
 * numpy (>= 1.19.0)
 * pandas (>= 0.23.3)
-* json (>= )
 * SQLAlchemy (>= 1.2.18)
 * nltk (>= 3.2.5)
 * scikit-learn (>= 0.23.1)
