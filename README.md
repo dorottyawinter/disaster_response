@@ -29,41 +29,50 @@ The app uses a custom ETL pipeline and ML pipeline.
 There are three components of the project.
 
 1. ETL Pipeline
-In a Python script, `process_data.py` is the data cleaning pipeline that:
-* Loads the `messages` and `categories` (labels) datasets
-* Merges the two datasets
-* Cleans the data
-* Stores it in a SQLite database
+
+   In a Python script, `process_data.py` is the data cleaning pipeline that:
+   * Loads the `messages` and `categories` (labels) datasets
+   * Merges the two datasets
+   * Cleans the data
+   * Stores it in a SQLite database
 
 2. ML Pipeline
-In a Python script, `train_classifier.py` is the machine learning pipeline that:
-* Loads data from the SQLite database
-* Splits the dataset into training and test sets
-* Builds a text processing and machine learning pipeline
-* Trains and tunes a model using GridSearchCV
-* Outputs results on the test set
-* Exports the final model as a pickle file
+
+   In a Python script, `train_classifier.py` is the machine learning pipeline that:
+   * Loads data from the SQLite database
+   * Splits the dataset into training and test sets
+   * Builds a text processing and machine learning pipeline
+   * Trains and tunes a model using GridSearchCV
+   * Outputs results on the test set
+   * Exports the final model as a pickle file
 
 3. Flask Web App
-In a Python script, `app.py` is the Flask web app that:
-* Uses the mentioned pipelines
-* Displays visualizations of the data
+
+   In a Python script, `app.py` is the Flask web app that:
+   * Uses the mentioned pipelines
+   * Displays visualizations of the data
 
 ## Running Instructions <a name="instructions"></a>
 #### Run process_data.py
 1. Save the `data` folder in the current working directory including `process_data.py`, `disaster_messages.csv` and `disaster_categories.csv`.
 2. From the current working directory, run the following command:
-`python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db`
+```
+python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db
+```
 
 #### Run train_classifier.py
 1. In the current working directory, create a folder called `models` and save `train_classifier.py` in it.
 2. From the current working directory, run the following command:
-`python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl`
+```
+python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl
+```
 
 #### Run the web app 
 1. Save the app folder in the current working directory.
 2. Run the following command in the app directory:
-`python run.py`
+```
+python run.py
+```
 3. Go to http:/localhost:3001/
 
 ## Web app <a name="app"></a>
