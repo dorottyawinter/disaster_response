@@ -64,11 +64,11 @@ In a Python script, `app.py` is the Flask web app that:
 1. Save the app folder in the current working directory.
 2. Run the following command in the app directory:
 `python run.py`
-3. Go to http://0.0.0.0:3001/
+3. Go to http:/localhost:3001/
 
 ## Web app <a name="app"></a>
-![app front](https://github.com/dorottyawinter/disaster_response/blob/master/app_front.jpg)
-![app results](https://github.com/dorottyawinter/disaster_response/blob/master/app_results.jpg)
+![app front](https://github.com/dorottyawinter/disaster_response/blob/master/app_front.png)
+![app results](https://github.com/dorottyawinter/disaster_response/blob/master/app_results.png)
 
 ## Warning <a name="warning"></a>
 In some categories, the proportion of positive occurrence is very low (<1%) in the training set. In these cases, even though the model performance is very high the results are not reliable.
