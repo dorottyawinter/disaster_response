@@ -75,4 +75,4 @@ In some categories, the proportion of positive occurrence is very low (<1%) in t
 
 ## Licensing, Authors, Acknowledgements <a name="licensing"></a>
 This app was completed as part of the [Udacity Data Scientist Nanodegree](https://udacity.com/nanodegrees/nd025). 
-The dataset origins from [Figure Eight]. (www.figure-eight.com)
+The dataset origins from Figure Eight.
