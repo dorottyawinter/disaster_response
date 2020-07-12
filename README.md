@@ -73,7 +73,7 @@ python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl
 ```
 python run.py
 ```
-3. Go to http:/localhost:3001/
+3. Go to [http:/localhost:3001/](http:/localhost:3001/)
 
 ## Web app <a name="app"></a>
 ![app front](https://github.com/dorottyawinter/disaster_response/blob/master/app_front.png)
