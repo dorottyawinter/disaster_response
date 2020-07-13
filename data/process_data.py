@@ -5,6 +5,16 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
+    '''
+    Load and merge messages and categories datasets.
+        
+    Args:
+        messages_filepath (str): filepath for csv file containing messages dataset
+        categories_filepath (str): filepath for csv file containing categories dataset
+        
+    Returns:
+        df (pd.DataFrame): dataframe containing messages and categories datasets merged
+    '''
     
     # import datasets
     messages = pd.read_csv(messages_filepath)
@@ -17,7 +27,17 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
-    
+    '''
+    Clean dataframe: remove duplicated records, split category column into 36 individual category columns, 
+    assign column names, convert category values to binary values.  
+
+    Args:
+        df (pd.DataFrame): dataframe containing messages and categories datasets merged
+        
+    Returns:
+        df (pd.DataFrame): cleaned version of input dataframe
+    '''
+
     # create a dataframe of the 36 individual category columns
     categories = df['categories'].str.split(pat=';', expand=True)
     categories.columns = [re.sub(pattern='-(0|1)', repl='', string=col) for col in categories.loc[0,:]]
@@ -32,13 +52,21 @@ def clean_data(df):
     # concatenate the original dataframe with the new categories dataframe
     df = pd.concat(objs=[df, categories], axis=1)
     
-    # drop duplicate records from df
+    # drop duplicated records from df
     df.drop_duplicates(inplace=True)
     
     return df
 
 
 def save_data(df, database_filename):
+    '''
+    Save cleaned data into an SQLite database.
+
+    Args:
+        df (pd.dataframe): cleaned dataset
+    Return:
+        None
+    '''
     
     engine = create_engine('sqlite:///'+database_filename)
     df.to_sql(name='messages', con=engine, index=False, if_exists='replace')

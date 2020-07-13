@@ -16,7 +16,7 @@ from nltk.stem import WordNetLemmatizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score #classification_report
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
@@ -28,21 +28,29 @@ warnings.filterwarnings('ignore')
 
 
 def load_data(database_filepath):
+    '''
+    Load and merge messages and categories datasets.
     
-    table_name='messages'
-    
+    Args:
+        database_filename (str): filepath for SQLite database containing cleaned data
+       
+    Returns:
+        X (pd.DataFrame): dataframe containing features
+        y (pd.DataFrame): dataframe containing labels
+        category_names (list of str): list containing category names
+    '''
+        
     # load data from database
     engine = create_engine('sqlite:///' + database_filepath)
-    df = pd.read_sql_table(table_name, engine)
+    df = pd.read_sql_table('messages', engine)
     
     # category_names
     category_names = df.columns[4:]
-    #category_names = [col for col in df.columns if re.search(pattern='-(0|1)', string=col)]
     
     # drop records with missing labels
     df = df.dropna(subset=category_names, how='any')
     
-    df = df[:100]
+    #df = df[:100]
         
     # X, y
     X = df['message'] #.values
@@ -52,9 +60,27 @@ def load_data(database_filepath):
     
 
 def tokenize(text):
+    '''
+    Normalize, tokenize, lemmatize text and remove stop words.
     
+    Args:
+        text (pd.Dataframe of str): text containing messages
+       
+    Returns:
+        text_cleaned (pd.Dataframe of str): cleaned version of input text
+    '''
+
     def lemmatize_all(text):
-    
+        '''
+        Lemmatize text and remove stop words.
+        
+        Args:
+            text (pd.Dataframe of str): text containing messages
+        
+        Returns:
+            text_cleaned (pd.Dataframe of str): lemmed version of input text
+        '''
+
         lemmatizer = WordNetLemmatizer()
 
         tokens_lemmed = []
@@ -87,6 +113,15 @@ def tokenize(text):
 
 
 def build_model():
+    '''
+    Build a machine learning pipeline.
+    
+    Args:
+        None
+       
+    Returns:
+        gridsearch_rf (GridsearchCV object): GridSearchCV object with Pipeline containing RandomForestClassifier
+    '''
     
     # classifier
     #classifier_rf = RandomForestClassifier(n_estimators=200)
@@ -97,7 +132,7 @@ def build_model():
     # pipeline with vectorizer and classifier
     pipeline_rf = Pipeline([
         ('vect', TfidfVectorizer(tokenizer=tokenize)), # CountVectorizer + TfidfTransformer
-        ('clf', MultiOutputClassifier(RandomForestClassifier(n_estimators=200, verbose=1)))
+        ('clf', MultiOutputClassifier(RandomForestClassifier(n_estimators=200)))
     ])
     
     # gridsearch
@@ -112,34 +147,71 @@ def build_model():
     
     
 def evaluate_model(model, X_test, Y_test, category_names):
-    
-    def performance_report_detailed(y_true, y_pred):
-    
-        y_cols = list(y_true.columns) 
-        report = classification_report(y_true, y_pred, target_names=y_cols, zero_division=0)
-
-        print(report)
-    
-    def performance_report_summarised(y_true, y_pred, output_df=True):
-    
-        y_cols = list(y_true.columns) 
-        report = classification_report(y_true, y_pred, target_names=y_cols, zero_division=0, output_dict=True)
-
-        selected_keys = ['micro avg', 'macro avg', 'weighted avg', 'samples avg']
-        report = {key: report[key] for key in selected_keys}
-        if output_df:
-            report = pd.DataFrame.from_dict(report, orient='index')
+    '''
+        Calculate evaluation metrics for ML model: accuracy, precision, recall, f1.
         
-        return report
+        Args:
+            model (model) : fitted model to evaluate
+            X_test (pd.DataFrame): test features
+            Y_test (pd.DataFrame): test labels
+            category_names (list of str): names of categories
+            
+        Returns:
+            None
+    '''
+
+    def get_perf_metrics(y_true, y_pred, colnames):
+        '''
+        Calculate performance metrics for ML model.
         
+        Args:
+            y_true (np.array): array containing actual values
+            y_pred (np.array): array containing predictions
+            colnames (list of str): names for the predicted fields
+            
+        Returns:
+            metrics_df (pd.DataFrame): dataframe containing the accuracy, precision, recall 
+            and f1 score for the labels
+        '''
+
+        metrics = []
+        # calculate evaluation metrics for the labels
+        for i in range(len(colnames)):
+
+            accuracy = accuracy_score(y_true[:, i], y_pred[:, i])
+            precision = precision_score(y_true[:, i], y_pred[:, i])
+            recall = recall_score(y_true[:, i], y_pred[:, i])
+            f1 = f1_score(y_true[:, i], y_pred[:, i])
+            
+            metrics.append([accuracy, precision, recall, f1])
+        
+        # create dataframe containing calculated metrics
+        metrics = np.array(metrics)
+        metrics_df = pd.DataFrame(data = metrics, index = colnames, columns = ['accuracy', 'precision', 'recall', 'f1'])
+        
+        return metrics_df
+    
     # predict
     y_test_pred = model.predict(X_test)
+
+    # calculate model performace
+    perf_metrics = get_perf_metrics(np.array(Y_test), y_test_pred, category_names)
         
-    print('Test performance:\n\n{}'.format(performance_report_summarised(Y_test, y_test_pred)))
+    print('Test performance:\n\n{}'.format(perf_metrics))
 
 
 def save_model(model, model_filepath):
-    
+    '''
+    Save model as pickle file.
+
+    Args:
+        model (model): ML model
+        model_filepath (str): filepath for model export
+
+    Returns:
+        None
+    '''
+
     with open(model_filepath, 'wb') as f:
         pickle.dump(model, f)
 
